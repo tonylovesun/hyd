@@ -1,0 +1,44 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/query/query",
+    "pages/input/input",
+    "pages/projects/projects",
+    "pages/about/about",
+    "pages/detail/detail",
+    "pages/modify/modify"
+  ],
+  "window": {
+    "navigationBarTitleText": "简医记",
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f7f7f7",
+    "backgroundTextStyle": "light",
+    "enablePullDownRefresh": false,
+    "enableShareAppMessage": true
+  },
+  "rendererOptions": {
+    "skyline": {
+      "defaultDisplayBlock": true,
+      "disableABTest": true,
+      "sdkVersionBegin": "3.0.0",
+      "sdkVersionEnd": "15.255.255"
+    }
+  },
+  "usingComponents": {
+    "van-button": "@vant/weapp/button/index",
+    "van-field": "@vant/weapp/field/index",
+    "van-cell-group": "@vant/weapp/cell-group/index",
+    "van-datetime-picker": "@vant/weapp/datetime-picker/index",
+    "van-cell": "@vant/weapp/cell/index",
+    "van-dialog": "@vant/weapp/dialog/index"
+  },
+  "requiredPrivateInfos": [
+    "getLocation",
+    "chooseAddress",
+    "chooseLocation"
+  ],
+  "componentFramework": "glass-easel",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

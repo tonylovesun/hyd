@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "统计",
+  "usingComponents": {
+  "van-cell-group": "@vant/weapp/cell-group",
+  "van-cell": "@vant/weapp/cell",
+  "van-popup": "@vant/weapp/popup",
+  "van-tree-select": "@vant/weapp/tree-select"
+  }
+}

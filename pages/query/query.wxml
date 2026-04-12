@@ -1,0 +1,37 @@
+<!-- pages/query/query.wxml -->
+<view class="container">
+  <!-- 筛选功能 -->
+  <view class="filter-section">
+
+    <!-- 化验单类型选择 -->
+    <picker mode="selector" range="{{categoryList}}" range-key="LBMC" bindchange="handleCategoryChange">
+      <van-cell title="化验单类型" value="{{selectedCategory !== null ? categoryList[selectedCategory].LBMC : '选择类别'}}" is-link />
+    </picker>
+
+    <!-- 起始日期选择 -->
+    <picker mode="date" bindchange="handleDateChange" data-type="startDate">
+      <van-cell title="起始日期" value="{{startDate || '选择起始日期'}}" is-link />
+    </picker>
+
+    <!-- 结束日期选择 -->
+    <picker mode="date" bindchange="handleDateChange" data-type="endDate">
+      <van-cell title="结束日期" value="{{endDate || '选择结束日期'}}" is-link />
+    </picker>
+
+    <view class="clear-button-section">
+      <van-button plain type="primary" block bindtap="handleClearFilters">清空条件</van-button>
+    </view>
+  </view>
+
+  <!-- 查询结果显示 -->
+  <block wx:if="{{noData}}">
+    <van-empty description="无记录" />
+  </block>
+  <block wx:else>
+    <van-cell-group>
+      <block wx:for="{{queryResults}}" wx:key="index">
+        <van-cell title="{{item.date}}" value="{{item.type}}" is-link data-id="{{item.id}}" data-cate_id="{{item.cate_id}}" data-type="{{item.type}}" bindtap="handleClick" />
+      </block>
+    </van-cell-group>
+  </block>
+</view>

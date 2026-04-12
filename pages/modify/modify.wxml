@@ -1,0 +1,56 @@
+<!-- pages/modify/modify.wxml -->
+<view class="page-container">
+<view class="container">
+  <!-- 加载图示 -->
+  <van-loading type="spinner" wx:if="{{isLoading}}" class="loading" />
+
+  <!-- 数据加载完成后显示的内容 -->
+  <view wx:elif="{{!isLoading}}">
+    <picker mode="date" value="{{date}}" bindchange="onDateChange">
+      <van-field label="化验日期:" value="{{date || '选择日期'}}" />
+    </picker>
+
+    <van-cell title="医院">
+      <input type="text" 
+      placeholder="{{hospital}}" 
+      bindinput="onHospitalInput" 
+      value="{{hospital}}" />
+    </van-cell>
+
+    <!-- 项目列表渲染 -->
+    <block wx:for="{{projectList}}" wx:key="r_i">
+      <van-cell title="{{item.name || item.project}}：" is-link="{{item.input !== 'input'}}">
+        <view class="input-container">
+          <!-- 如果 input 是 'input'，显示 van-field -->
+          <block wx:if="{{item.input === 'input'}}">
+            <input 
+            type="number" 
+            placeholder="{{projectValues[item.r_i] || A[item.r_i] || ''}}" 
+            data-index="{{index}}" 
+            bindinput="onProjectInput" />
+            <label>{{item.Unit}}</label>
+          </block>
+
+          <!-- 如果 input 不是 'input'，显示 picker -->
+          <block wx:else>
+            <picker 
+              mode="selector" 
+              range="{{pickerData[index]}}" 
+              range-key="LBMC" 
+              data-index="{{index}}" 
+              bindchange="onPickerChange">
+              <view class="picker">
+                {{projectValues[item.r_i] !== undefined && pickerData[index] && pickerData[index][projectValues[item.r_i]] 
+              ? pickerData[index][projectValues[item.r_i]].LBMC : A[item.r_i] || '选择参数'}}
+              </view>
+            </picker>
+          </block>
+        </view>
+      </van-cell>
+    </block>
+  </view>
+    <view class="submit-btn">
+      <van-button type="primary" size="large" bindtap="onSubmit">提交修改</van-button>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,32 @@
+<!--pages/about/about.wxml-->
+<view class="container">
+  <view class="intro-text">
+    <text>我们开发这个免费软件的初心是为了给大家提供便利和帮助，</text>
+    <text>为了带来真正有价值的产品。希望您提出宝贵建议。</text>
+    <!-- <text>如果您觉得这个软件对您有帮助，</text>
+    <text>希望您能考虑捐助支持我们，</text>
+    <text>让我们能够持续改进和维护这个软件，</text>
+    <text>为您提供更好的服务！</text> -->
+  </view>
+    <!-- 输入框部分 -->
+  <van-cell-group>
+    <text class="field-text">邮箱或手机</text>
+    <van-field
+    placeholder="请输入联系人邮箱或手机"
+    bind:input="onContactInput"
+    value="{{contactValue}}"
+    class="large-input contact-input"
+    />
+    <text class="field-text">用户意见</text >
+   <van-field
+    placeholder="请输入您的意见"
+    bind:input="onOpinionInput"
+    value="{{opinionValue}}"
+    type="textarea"
+    autosize
+    class="large-input opinion-input"
+    />
+  </van-cell-group>
+  <!-- 提交按钮 -->
+  <van-button round type="primary" size="large" bindtap="onSubmit">提交</van-button>
+</view>

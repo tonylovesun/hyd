@@ -1,0 +1,21 @@
+/* pages/query/query.wxss */
+page {
+  background-color: #f8f8f8;
+  }
+  
+.container {
+  padding: 16px;
+}
+
+.filter-section {
+  margin-bottom: 20px;
+}
+
+.picker {
+  font-size: 16px;
+  color: #333;
+}
+
+.weui-picker {
+  padding: 12px;
+}

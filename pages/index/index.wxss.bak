@@ -1,0 +1,367 @@
+/* pages/index/index.wxss */
+
+/* 页面基础 */
+.page-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f0f7ff 0%, #f5f5f5 100%);
+  padding-bottom: 40rpx;
+}
+
+/* ========== 顶部卡片 ========== */
+.header-card {
+  position: relative;
+  padding: 40rpx 30rpx;
+  overflow: hidden;
+}
+
+.header-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 300rpx;
+  background: linear-gradient(135deg, #07c160 0%, #10b981 50%, #059669 100%);
+  border-radius: 0 0 40rpx 40rpx;
+}
+
+.header-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* 用户信息区 */
+.user-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.avatar-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.avatar {
+  width: 80rpx;
+  height: 80rpx;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+}
+
+.avatar-text {
+  font-size: 36rpx;
+  color: #07c160;
+  font-weight: bold;
+}
+
+.user-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.welcome-text {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.app-name {
+  font-size: 36rpx;
+  color: #fff;
+  font-weight: bold;
+  letter-spacing: 2rpx;
+}
+
+/* 记录徽章 */
+.record-badge {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10rpx);
+  padding: 16rpx 24rpx;
+  border-radius: 30rpx;
+  display: flex;
+  align-items: baseline;
+  gap: 8rpx;
+}
+
+.badge-num {
+  font-size: 40rpx;
+  color: #fff;
+  font-weight: bold;
+}
+
+.badge-text {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* 消息提示卡片 */
+.message-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20rpx;
+  padding: 24rpx;
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.08);
+}
+
+.message-icon {
+  font-size: 40rpx;
+  flex-shrink: 0;
+}
+
+.message-text {
+  flex: 1;
+  font-size: 26rpx;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+/* ========== 功能区域 ========== */
+.section {
+  margin: 0 30rpx 30rpx;
+}
+
+.section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+  padding: 0 10rpx;
+}
+
+.title-text {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.more-link {
+  font-size: 26rpx;
+  color: #07c160;
+}
+
+/* 功能网格 */
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+}
+
+.feature-item {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 32rpx 24rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.feature-item:active {
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.02);
+}
+
+.feature-icon-wrapper {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16rpx;
+}
+
+/* 不同功能的主题色 */
+.feature-scan .feature-icon-wrapper {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+}
+
+.feature-input .feature-icon-wrapper {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+}
+
+.feature-query .feature-icon-wrapper {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+}
+
+.feature-analysis .feature-icon-wrapper {
+  background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+}
+
+.feature-icon {
+  font-size: 48rpx;
+}
+
+.feature-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 8rpx;
+}
+
+.feature-desc {
+  font-size: 24rpx;
+  color: #9ca3af;
+}
+
+/* ========== 最近记录 ========== */
+.record-list {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 10rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+}
+
+.record-item {
+  display: flex;
+  align-items: center;
+  padding: 24rpx;
+  border-bottom: 1rpx solid #f3f4f6;
+}
+
+.record-item:last-child {
+  border-bottom: none;
+}
+
+.record-item:active {
+  background: #f9fafb;
+  border-radius: 16rpx;
+}
+
+.record-type-tag {
+  padding: 8rpx 16rpx;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  color: #fff;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.record-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.record-date {
+  font-size: 28rpx;
+  color: #374151;
+  font-weight: 500;
+}
+
+.record-hospital {
+  font-size: 24rpx;
+  color: #9ca3af;
+}
+
+.record-arrow {
+  font-size: 36rpx;
+  color: #d1d5db;
+  margin-left: 10rpx;
+}
+
+/* ========== 空状态 ========== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80rpx 60rpx;
+  margin: 0 30rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.04);
+}
+
+.empty-icon {
+  font-size: 100rpx;
+  margin-bottom: 30rpx;
+}
+
+.empty-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 16rpx;
+}
+
+.empty-desc {
+  font-size: 26rpx;
+  color: #9ca3af;
+  text-align: center;
+  margin-bottom: 40rpx;
+  line-height: 1.5;
+}
+
+.empty-action {
+  background: linear-gradient(135deg, #07c160 0%, #059669 100%);
+  color: #fff;
+  padding: 24rpx 60rpx;
+  border-radius: 40rpx;
+  font-size: 30rpx;
+  font-weight: 500;
+  box-shadow: 0 8rpx 24rpx rgba(7, 193, 96, 0.3);
+}
+
+.empty-action:active {
+  transform: scale(0.98);
+}
+
+/* ========== 加载状态 ========== */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx;
+}
+
+.loading-spinner {
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid #e5e7eb;
+  border-top-color: #07c160;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20rpx;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #9ca3af;
+}
+
+/* ========== 底部版权 ========== */
+.footer {
+  text-align: center;
+  padding: 40rpx 30rpx;
+  margin-top: 20rpx;
+}
+
+.footer-link {
+  display: inline-block;
+  font-size: 26rpx;
+  color: #6b7280;
+  margin-bottom: 16rpx;
+}
+
+.footer-text {
+  display: block;
+  font-size: 22rpx;
+  color: #d1d5db;
+}

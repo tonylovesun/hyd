@@ -1,0 +1,33 @@
+name: Deploy Mini Program
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Install Dependencies
+        run: npm ci
+        
+      - name: Build
+        run: npm run build:weapp || echo "No build step needed"
+        
+      - name: Upload to WeChat Mini Program
+        uses: manstrofeteam/wechat-miniprogram-upload@v1.0.6
+        with:
+          appid: ${{ secrets.WX_APPID }}
+          privatekey: ${{ secrets.WX_PRIVATE_KEY }}
+          version: ${{ github.run_number }}
+          desc: 'GitHub Actions 自动部署'

@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "sessions": {
+    "8f7ba84980a64a8e8e0a13e0e8b5a4e9": [
+      {
+        "expertId": "FrontendDeveloper",
+        "name": "Paul",
+        "profession": "前端开发工程师",
+        "avatarUrl": "https://acc-1258344699.cos.accelerate.myqcloud.com/workbuddy/experts/avatars/02-Engineering/FrontendDeveloper/FrontendDeveloper.png",
+        "promptUrl": "https://acc-1258344699.cos.accelerate.myqcloud.com/workbuddy/experts/experts/02-Engineering/FrontendDeveloper/FrontendDeveloper_zh.md",
+        "usedAt": 1775873831063,
+        "industryId": "02-Engineering"
+      },
+      {
+        "expertId": "WeChatMiniProgramDeveloper",
+        "name": "Cody",
+        "profession": "微信小程序开发者",
+        "avatarUrl": "https://acc-1258344699.cos.accelerate.myqcloud.com/workbuddy/experts/avatars/02-Engineering/WeChatMiniProgramDeveloper/WeChatMiniProgramDeveloper.png",
+        "promptUrl": "https://acc-1258344699.cos.accelerate.myqcloud.com/workbuddy/experts/experts/02-Engineering/WeChatMiniProgramDeveloper/WeChatMiniProgramDeveloper_zh.md",
+        "usedAt": 1775828934032,
+        "industryId": "07-ProjectManagement"
+      }
+    ]
+  },
+  "lastUpdated": 1775873854583
+}

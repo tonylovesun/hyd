@@ -1,0 +1,60 @@
+<view class="container">
+  <!-- 加载状态 
+  <view wx:if="{{isLoading}}" class="loading">
+    <van-loading type="spinner" size="35px" text-size="18px" color="#1989fa" vertical>AI深度思考中...</van-loading>
+  </view> -->
+
+  <!-- 数据存在时的表格显示 -->
+  <view wx:if="{{!noData}}">
+    <view class="van-table">
+      <!-- 表头 -->
+      <van-row class="header" tag="div" >
+       <div class="hb" >
+        <van-col span="12" >项目名称</van-col>
+        <van-col span="6" >此次检查</van-col>
+        <van-col span="6">最近检查</van-col>
+       </div>
+      </van-row>
+
+      <!-- 表内容 -->
+      <block wx:for="{{detailData}}" wx:key="name">
+        <van-row class="table-row">
+          <van-col span="12" class="first-column">{{item.name}}</van-col>
+          <van-col span="6">{{item.currentData}}</van-col>
+          <van-col span="6">{{item.previousData}}</van-col>
+        </van-row>
+      </block>
+    </view>
+  </view>
+
+  <!-- 无记录时显示 -->
+  <view wx:else>
+    <van-empty description="无记录" />
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="button-container">
+    <van-col span="12" class="button-box">
+      <van-button type="danger" block bindtap="handleDelete" custom-class="delete-button">删除</van-button>
+    </van-col>
+    <van-col span="12" class="button-box">
+      <van-button type="primary" block bindtap="handleEdit" custom-class="edit-button">修改</van-button>
+    </van-col>
+  </view>
+      <!-- 分析文本 -->
+    <view class="text-box" >
+      <van-button 
+    bind:click="handleAIAnalysis"
+    wx:if="{{!aiResult}}"
+    type="primary" 
+    size="small"
+    round
+    custom-class="ai-analysis-btn"
+    loading="{{aiLoading}}"
+    loading-text="AI深度分析中..."
+  >
+  进行AI分析
+  </van-button>
+  <text>{{ aiResult }}</text>
+    </view> 
+</view>

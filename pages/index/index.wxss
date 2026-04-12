@@ -1,0 +1,334 @@
+/* pages/index/index.wxss - 极简风格首页 */
+
+/* ========== 页面基础 ========== */
+.page-container {
+  min-height: 100vh;
+  background: #fafafa;
+  padding-bottom: 140rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========== 极简导航栏 ========== */
+.nav-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 32rpx;
+  background: #fff;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.nav-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+  letter-spacing: 2rpx;
+}
+
+.nav-menu {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-menu text {
+  font-size: 40rpx;
+  color: #666;
+}
+
+/* ========== 主操作区域 ========== */
+.main-action {
+  padding: 60rpx 40rpx 40rpx;
+  background: #fff;
+}
+
+/* 主按钮 */
+.primary-btn {
+  background: linear-gradient(135deg, #07c160 0%, #10b981 100%);
+  border-radius: 24rpx;
+  padding: 60rpx 40rpx;
+  box-shadow: 0 12rpx 40rpx rgba(7, 193, 96, 0.25);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.primary-btn:active {
+  transform: scale(0.98);
+  box-shadow: 0 8rpx 30rpx rgba(7, 193, 96, 0.2);
+}
+
+.primary-btn-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.primary-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.primary-text {
+  font-size: 40rpx;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 12rpx;
+}
+
+.primary-desc {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* 分隔线 */
+.divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 40rpx 0;
+  gap: 24rpx;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1rpx;
+  background: #e5e5e5;
+}
+
+.divider-text {
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* 次级按钮 */
+.secondary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  padding: 28rpx;
+  background: #f7f7f7;
+  border-radius: 16rpx;
+  transition: background 0.2s;
+}
+
+.secondary-btn:active {
+  background: #eeeeee;
+}
+
+.secondary-icon {
+  font-size: 36rpx;
+}
+
+.secondary-text {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+/* ========== 历史记录区 ========== */
+.record-section {
+  flex: 1;
+  padding: 32rpx 32rpx 0;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.section-count {
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* 记录列表 */
+.record-list {
+  background: #fff;
+  border-radius: 20rpx;
+  overflow: hidden;
+}
+
+.record-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28rpx 28rpx;
+  border-bottom: 1rpx solid #f5f5f5;
+  transition: background 0.15s;
+}
+
+.record-item:last-of-type {
+  border-bottom: none;
+}
+
+.record-item:active {
+  background: #fafafa;
+}
+
+.record-left {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  flex: 1;
+}
+
+.record-type-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.record-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.record-type {
+  font-size: 30rpx;
+  color: #1a1a1a;
+  font-weight: 500;
+}
+
+.record-meta {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.record-arrow {
+  font-size: 36rpx;
+  color: #ccc;
+  margin-left: 16rpx;
+}
+
+/* 查看更多 */
+.view-more {
+  padding: 28rpx;
+  text-align: center;
+  border-top: 1rpx solid #f0f0f0;
+  transition: background 0.15s;
+}
+
+.view-more:active {
+  background: #fafafa;
+}
+
+.view-more text {
+  font-size: 28rpx;
+  color: #07c160;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80rpx 40rpx;
+  background: #fff;
+  border-radius: 20rpx;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+  opacity: 0.5;
+}
+
+.empty-text {
+  font-size: 30rpx;
+  color: #666;
+  margin-bottom: 12rpx;
+}
+
+.empty-hint {
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* 加载状态 */
+.loading-state {
+  display: flex;
+  justify-content: center;
+  padding: 60rpx;
+}
+
+.loading-dots {
+  display: flex;
+  gap: 8rpx;
+}
+
+.dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #ccc;
+  animation: dot-bounce 1.4s ease-in-out infinite;
+}
+
+.dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes dot-bounce {
+  0%, 80%, 100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1.3);
+    opacity: 1;
+  }
+}
+
+/* ========== 底部工具栏 ========== */
+.bottom-toolbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  background: #fff;
+  padding: 20rpx 0;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  border-top: 1rpx solid #f0f0f0;
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.03);
+}
+
+.tool-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+  padding: 10rpx 30rpx;
+  transition: opacity 0.15s;
+}
+
+.tool-item:active {
+  opacity: 0.6;
+}
+
+.tool-icon {
+  font-size: 40rpx;
+}
+
+.tool-text {
+  font-size: 22rpx;
+  color: #666;
+}

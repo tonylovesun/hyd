@@ -1,0 +1,61 @@
+<!-- pages/projects/projects.wxml -->
+<view class="container">
+  <!-- 时间选择器 -->
+  <van-cell-group>
+    <picker mode="date" bindchange="handleDateChange" data-type="startDate">
+      <van-cell title="起始日期" value="{{startDate || '选择起始日期'}}" is-link />
+    </picker>
+
+    <picker mode="date" bindchange="handleDateChange" data-type="endDate">
+      <van-cell title="结束日期" value="{{endDate || '选择结束日期'}}" is-link />
+    </picker>
+    
+    <van-cell title="选择绘图项目" is-link bind:click="showPicker">
+      <text>{{selectedProjectName || '未选择项目'}}</text>
+    </van-cell>
+  </van-cell-group>
+
+  <!-- 类别和项目选择弹出层 -->
+  <van-popup bind:close="onClose" show="{{showPickerPopup}}" position="bottom">
+    <van-tree-select
+      items="{{categoryList}}"
+      main-active-index="{{mainActiveIndex}}"
+      active-id="{{activeId}}"
+      bind:click-nav="onClickNav"
+      bind:click-item="onClickItem"
+    />
+  </van-popup>
+
+  <!-- 查询按钮 -->
+  <view class="section">
+    <van-button plain type="primary" block bindtap="onQueryClick">查询</van-button>
+  </view>
+
+  <!-- 图表展示 -->
+  <view class="chart-container" wx:if="{{showChart && chartData.length > 0}}">
+    <canvas canvas-id="myCanvas" class="chart-canvas" disable-scroll="true"></canvas>
+  </view>
+  <!-- 项目简介 -->
+  <view class="detail-section" wx:if="{{showChart && chartData.length > 0}}">
+    <text>{{projectDetail}}</text>
+    <van-button 
+    bind:click="handleAIAnalysis"
+    wx:if="{{!aiResult}}"
+    type="primary" 
+    size="small"
+    round
+    custom-class="ai-analysis-btn"
+    loading="{{aiLoading}}"
+    loading-text="AI深度分析中..."
+    style="display: block;" 
+  >
+  使用AI进一步分析
+  </van-button>
+  <text>{{ aiResult }}</text>
+  </view>
+
+  <!-- 当没有数据时显示提示信息 -->
+  <view class="no-data-message" wx:if="{{showChart && chartData.length === 0}}">
+    {{noDataMessage}}
+  </view>
+</view>

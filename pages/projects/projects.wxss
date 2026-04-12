@@ -1,0 +1,55 @@
+/* pages/projects/projects.wxss */
+page {
+  background-color: #f8f8f8;
+  }
+
+.detail-section {
+  padding: 20px; /* 四周留出空间 */
+  background-color: #f9f9f9; /* 浅灰色背景 */
+  border-radius: 10px; /* 圆角 */
+  margin: 10px; /* 外边距 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加阴影 */
+}
+
+.detail-section text {
+  font-size: 15px; /* 文本大小 */
+  color: #333; /* 文本颜色 */
+  line-height: 1.5; /* 行高，增强可读性 */
+}
+
+.container {
+  padding: 16px;
+}
+
+.picker {
+  font-size: 16px;
+  color: #333;
+}
+
+.chart-container {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 12rpx rgba(76, 175, 80, 0.1);
+  padding: 20rpx;
+  margin: 20rpx;
+  background: transparentstyle;
+  display: flex; 
+  justify-content: center; 
+  align-items: center;
+}
+
+.ai-analysis-btn {
+  display: block;
+  /* 其他样式保持不变 */
+}
+
+.chart-canvas {
+  width: 100%;
+  height: 500rpx;
+}
+
+.ai-analysis-btn {
+  margin-top: 20px !important;
+  background: linear-gradient(90deg, #1989fa, #1e88e5) !important;
+  box-shadow: 0 4rpx 12rpx rgba(25, 137, 250, 0.3) !important;
+}

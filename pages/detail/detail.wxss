@@ -1,0 +1,70 @@
+
+page{
+  background-color: #f8f8f8;
+}
+
+.container {
+  background-color: #ffffff;
+  padding-top: 5px;
+  padding-bottom: 15px;
+}
+
+.van-table {
+  margin: 15px;
+}
+
+.header {
+  font-family: "黑体", serif; 
+  font-size: 15px; /* 字体大小 */
+  line-height: 20px; /* 行高20px */
+  color:darkslateblue
+}
+
+.table-row {
+  line-height: 20px; /* 行高20px */
+  font-family: "仿宋", serif; /* 字体使用仿宋 */
+  font-size: 15px; /* 字体大小 */
+}
+
+.button-container {
+  display: flex;
+}
+
+.button-box {
+  width: 90%; /* 按钮宽度为60% */
+  font-family: "中宋", serif;
+  display: flex;
+  justify-content: center; /* 按钮居中 */
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh; /* 或者根据需要设置高度 */
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 999;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+}
+
+.text-box {
+  padding: 20px; /* 四周留出空间 */
+  background-color: #f9f9f9; /* 浅灰色背景 */
+  border-radius: 10px; /* 圆角 */
+  margin: 10px; /* 外边距 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加阴影 */
+  font-size: 15px; /* 文本大小 */
+  color: #333; /* 文本颜色 */
+  line-height: 1.5; /* 行高，增强可读性 */
+  white-space: pre-wrap;
+}
+
+/* 确保表格和按钮的原有样式保持 */
+.van-table {
+  margin-bottom: 20rpx;
+}
+
+

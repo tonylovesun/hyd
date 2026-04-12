@@ -1,0 +1,36 @@
+/* pages/about/about.wxss */
+page {
+  background-color: #f5f5f5;
+}
+
+.container {
+  padding: 20px;
+}
+
+.intro-text {
+  font-family: 'FangSong'; 
+  font-size: 18px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+  padding: 0 25px;  /* 增加左右间距 */
+}
+
+.field-text {
+  margin-top: 5px; /* 上间距 */
+  margin-bottom: 5px; /* 下间距 */
+}
+
+/* 确保placeholder文字靠左 */
+.van-field__control {
+  padding-left: 5px;
+}
+
+.van-button {
+  margin-top: 5px; /* 设置按钮上间距为 5px */
+}
+
+.van-field__body--textarea {
+  height: 200px; /* 设置意见输入框高度 */
+  margin-top: 15px; /* 添加上下间距 */
+  margin-bottom: 15px; /* 添加上下间距 */
+}

@@ -1,0 +1,60 @@
+<!-- pages/input/input.wxml -->
+<view class="page-container">
+<view class="container">
+  <!-- 化验日期选择 -->
+  <picker mode="date" value="{{date}}" start="2020-01-01" bindchange="onDateChange">
+    <van-cell title="化验日期" value="{{date || '选择日期'}}" is-link />
+  </picker>
+  
+  <!-- 医院输入 -->
+  <view>
+    <van-cell title="医院">
+      <input type="text" placeholder="请输入医院" bindinput="onHospitalInput" value="{{hospital}}" />
+    </van-cell>
+  </view>
+
+  <!-- 化验单类型选择 -->
+  <picker mode="selector" range="{{categoryList}}" range-key="LBMC" bindchange="onCategoryChange">
+    <van-cell title="化验单类型" value="{{selectedCategory !== categoryList[selectedCategory] ? categoryList[selectedCategory].LBMC : '选择类别'}}" is-link />
+  </picker>
+  
+  <!-- 项目列表 -->
+  <block wx:for="{{projectList}}" wx:key="r_i">
+    <van-cell title="{{item.project}}：" 
+    is-link="{{item.input !== 'input'}}" 
+    >
+      <view class="input-container">
+        <!-- 如果 input 是 'input'，显示输入框 -->
+        <block wx:if="{{item.input === 'input'}}">
+          <input 
+            type="number" 
+            placeholder="数值" 
+            data-index="{{index}}" 
+            bindinput="onProjectInput" />
+          <label>{{item.Unit}}</label>
+        </block>
+
+        <!-- 如果 input 不是 'input'，显示 picker -->
+        <block wx:else>
+          <picker 
+            mode="selector" 
+            range="{{pickerData[index]}}" 
+            range-key="LBMC" 
+            data-index="{{index}}" 
+            bindchange="onPickerChange">
+            <view class="picker">
+              {{projectValues[item.r_i] !== undefined && pickerData[index] && pickerData[index][projectValues[item.r_i]] 
+                ? pickerData[index][projectValues[item.r_i]].LBMC: '选择参数'}}
+            </view>
+          </picker>
+        </block>
+      </view>
+    </van-cell>
+  </block>
+</view>
+
+<!-- 提交按钮 -->
+<view class="submit-btn">
+  <van-button type="primary" size="large" bindtap="onSubmit">提交</van-button>
+</view>
+</view>

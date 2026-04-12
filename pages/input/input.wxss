@@ -1,0 +1,31 @@
+/* pages/input/input.wxss */
+.page-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100vh; /* 使整个页面容器高度为视口高度 */
+}
+
+.container {
+  flex-grow: 1; /* 让 .container 占据剩余的空间 */
+  overflow-y: auto; /* 如果内容超出容器高度，允许滚动 */
+  padding: 20rpx;
+}
+
+.submit-btn {
+  height: 60px; /* 按钮的高度 */
+  background-color: #f8f8f8; /* 背景颜色 */
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* 阴影效果 */
+}
+
+.van-cell__value {
+  color: #999;
+}
+
+.container {
+  padding: 16px;
+}
+
+page {
+  background-color: #f8f8f8;
+  }
