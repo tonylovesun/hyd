@@ -21,13 +21,11 @@ jobs:
       - name: Install Dependencies
         run: npm ci
         
-      - name: Build
-        run: npm run build:weapp || echo "No build step needed"
+      - name: Install miniprogram-ci
+        run: npm install miniprogram-ci
         
       - name: Upload to WeChat Mini Program
-        uses: manstrofeteam/wechat-miniprogram-upload@v1.0.6
-        with:
-          appid: ${{ secrets.WX_APPID }}
-          privatekey: ${{ secrets.WX_PRIVATE_KEY }}
-          version: ${{ github.run_number }}
-          desc: 'GitHub Actions 自动部署'
+        run: node scripts/upload.js
+        env:
+          WX_APPID: ${{ secrets.WX_APPID }}
+          WX_PRIVATE_KEY: ${{ secrets.WX_PRIVATE_KEY }}
