@@ -313,24 +313,33 @@ Page({
     }
   },
 
-  // 图片压缩
+  // 图片压缩 - 提高质量和更智能的压缩
   compressImage(imgPath) {
     return new Promise((resolve, reject) => {
       wx.getImageInfo({
         src: imgPath,
         success: (info) => {
-          const maxSize = 1024;
+          console.log('原始图片:', info.width + 'x' + info.height, '格式:', info.type);
+          // 降低阈值到1500px，保持更高质量
+          const maxSize = 1500;
           if (info.width > maxSize || info.height > maxSize) {
             const ratio = Math.min(maxSize / info.width, maxSize / info.height);
             wx.compressImage({
               src: imgPath,
-              quality: 70,
+              quality: 90,  // 提高压缩质量到90
               compressedWidth: Math.round(info.width * ratio),
               compressedHeight: Math.round(info.height * ratio),
-              success: (res) => resolve(res.tempFilePath),
-              fail: reject
+              success: (res) => {
+                console.log('压缩成功:', res.tempFilePath);
+                resolve(res.tempFilePath);
+              },
+              fail: (err) => {
+                console.error('压缩失败，使用原图:', err);
+                resolve(imgPath);
+              }
             });
           } else {
+            console.log('图片无需压缩');
             resolve(imgPath);
           }
         },
@@ -339,13 +348,24 @@ Page({
     });
   },
 
-  // 读取Base64
+  // 读取Base64 - 添加图片格式前缀
   readBase64(imgPath) {
     return new Promise((resolve, reject) => {
       wx.getFileSystemManager().readFile({
         filePath: imgPath,
         encoding: 'base64',
-        success: (res) => resolve(res.data),
+        success: (res) => {
+          console.log('Base64长度:', res.data.length);
+          // 根据路径判断图片格式，添加前缀
+          const ext = imgPath.split('.').pop().toLowerCase();
+          let prefix = 'data:image/jpeg;base64,';
+          if (ext === 'png') prefix = 'data:image/png;base64,';
+          else if (ext === 'jpg' || ext === 'jpeg') prefix = 'data:image/jpeg;base64,';
+          else if (ext === 'webp') prefix = 'data:image/webp;base64,';
+          const base64WithPrefix = prefix + res.data;
+          console.log('带前缀Base64长度:', base64WithPrefix.length);
+          resolve(base64WithPrefix);
+        },
         fail: () => reject(new Error('图片读取失败'))
       });
     });
@@ -354,19 +374,26 @@ Page({
   // OCR识别
   callServerOCR(imageBase64) {
     return new Promise((resolve, reject) => {
+      console.log('开始OCR识别...');
       const requestTask = wx.request({
         url: 'https://jyj.lboxshop.cc/ocr',
         method: 'POST',
         header: { 'Content-Type': 'application/json' },
         data: { imageBase64 },
         success: (res) => {
+          console.log('OCR响应:', res.statusCode, JSON.stringify(res.data).substring(0, 200));
           if (res.statusCode === 200 && res.data.code === 0 && res.data.result) {
+            console.log('OCR成功，识别条目数:', res.data.result.length);
             resolve(res.data.result);
           } else {
+            console.error('OCR失败:', res.data.message || '未知错误');
             reject(new Error(res.data.message || 'OCR识别失败'));
           }
         },
-        fail: (err) => reject(new Error(err.errMsg || '网络请求失败'))
+        fail: (err) => {
+          console.error('请求失败:', err);
+          reject(new Error(err.errMsg || '网络请求失败'));
+        }
       });
 
       setTimeout(() => {
@@ -376,9 +403,10 @@ Page({
     });
   },
 
-  // 解析OCR结果
+  // 解析OCR结果 - 增强版
   parseOCRResult(ocrData) {
     if (!ocrData || !Array.isArray(ocrData)) {
+      console.error('OCR数据格式异常:', typeof ocrData);
       throw new Error('OCR数据格式异常');
     }
 
@@ -386,6 +414,9 @@ Page({
       text: item.DetectedText?.trim() || '',
       location: item.ItemPolygon || {}
     }));
+
+    console.log('识别到的文字数:', texts.length);
+    console.log('识别内容:', texts.map(t => t.text).join(' | '));
 
     // 提取医院名称
     const hospitalItem = texts.find(t => /(医院|中心|门诊|诊所)/.test(t.text));
@@ -406,34 +437,62 @@ Page({
     });
 
     const aliasKeys = Object.keys(aliasMap).sort((a, b) => b.length - a.length);
+    console.log('项目别名数:', aliasKeys.length);
     if (aliasKeys.length === 0) return null;
 
     const regex = new RegExp(aliasKeys.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'i');
 
-    // 匹配项目
+    // 匹配项目 - 增强数值提取
     const typeCount = {};
     const matchedProjects = {};
     
     texts.forEach((textItem, index) => {
-      const match = textItem.text.match(regex);
+      const text = textItem.text;
+      const match = text.match(regex);
       if (match) {
         const matchedAlias = match[0];
         const { type, r_i } = aliasMap[matchedAlias];
         typeCount[type] = (typeCount[type] || 0) + 1;
+        console.log('匹配到项目:', matchedAlias, 'type:', type, 'r_i:', r_i);
 
-        // 提取数值
+        // 提取数值 - 改进：支持更多格式
         let value = null;
-        const valueMatch = textItem.text.replace(matchedAlias, '').trim().match(/^(\d+(\.\d+)?)/);
+        
+        // 方式1: 项目名后面的数字
+        const afterMatch = text.replace(matchedAlias, '').trim();
+        const valueMatch = afterMatch.match(/^[：:]*\s*([<>]?\s*\d+(\.\d+)?)/);
         if (valueMatch) {
-          value = parseFloat(valueMatch[1]);
-        } else if (index + 1 < texts.length) {
-          const nextMatch = texts[index + 1].text.match(/^(\d+(\.\d+)?)/);
-          if (nextMatch) value = parseFloat(nextMatch[1]);
+          value = parseFloat(valueMatch[1].replace(/\s/g, ''));
+          console.log('  从本行提取数值:', value);
+        }
+        
+        // 方式2: 下一行的数字
+        if (value === null && index + 1 < texts.length) {
+          const nextText = texts[index + 1].text;
+          const nextMatch = nextText.match(/^([<>]?\s*\d+(\.\d+)?)/);
+          if (nextMatch) {
+            value = parseFloat(nextMatch[1].replace(/\s/g, ''));
+            console.log('  从下一行提取数值:', value);
+          }
+        }
+        
+        // 方式3: 查找同行任意位置的数字
+        if (value === null) {
+          const anyMatch = text.match(/([<>]?\s*\d+(\.\d+)?)/);
+          if (anyMatch) {
+            value = parseFloat(anyMatch[1].replace(/\s/g, ''));
+            console.log('  从同行提取数值:', value);
+          }
         }
 
-        if (value !== null) matchedProjects[r_i] = value;
+        if (value !== null) {
+          matchedProjects[r_i] = value;
+        }
       }
     });
+
+    console.log('匹配到的项目:', matchedProjects);
+    console.log('类型计数:', typeCount);
 
     // 确定cate_id
     let cate_id = 0;
@@ -444,6 +503,7 @@ Page({
         cate_id = parseInt(type);
       }
     }
+    console.log('确定类型ID:', cate_id, '匹配数:', maxCount);
 
     // 过滤最终项目
     const finalProjects = {};
@@ -452,6 +512,8 @@ Page({
         finalProjects[item.r_i] = matchedProjects[item.r_i];
       }
     });
+
+    console.log('最终项目:', finalProjects);
 
     if (Object.keys(finalProjects).length === 0) {
       wx.showToast({ title: '无有效项目', icon: 'none' });
