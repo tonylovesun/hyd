@@ -39,11 +39,12 @@ async function upload() {
     });
     console.log('项目配置完成');
     
-    // 上传
-    const uploadResult = await ci.upload({
+    // 预览/发布体验版
+    const qrcodePath = path.join(__dirname, 'preview-qrcode.png');
+    const previewResult = await ci.preview({
       project: project,
       version: process.env.GITHUB_RUN_NUMBER || '1.0.0',
-      desc: 'GitHub Actions 自动部署 - ' + (process.env.GITHUB_SHA ? process.env.GITHUB_SHA.substring(0, 7) : 'local'),
+      desc: 'GitHub Actions 自动发布体验版 - ' + (process.env.GITHUB_SHA ? process.env.GITHUB_SHA.substring(0, 7) : 'local'),
       setting: {
         es6: true,
         minify: true,
@@ -51,13 +52,17 @@ async function upload() {
         minifyWXSS: true,
         minifyJS: true,
       },
+      qrcodeOutputPath: qrcodePath,
       onProgressUpdate: (progress) => {
-        console.log('上传进度:', progress);
+        console.log('上传进度:', progress.message || progress);
       },
     });
     
-    console.log('=== 上传成功 ===');
-    console.log('上传结果:', JSON.stringify(uploadResult, null, 2));
+    console.log('=== 体验版发布成功 ===');
+    console.log('版本:', previewResult.version);
+    console.log('提示:', previewResult.extMsg || '请在微信公众平台查看体验版');
+    
+    // 上传二维码作为 artifact（GitHub Actions 会自动处理）
     
   } catch (err) {
     console.error('=== 上传失败 ===');
