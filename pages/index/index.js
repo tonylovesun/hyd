@@ -18,6 +18,8 @@ Page({
     loading: false,
     recordCount: 0,
     recentRecords: [],
+    previewImage: '',  // 预览图片路径
+    tempImagePath: '', // 临时存储待处理图片
   },
 
   onLoad() {
@@ -245,19 +247,48 @@ Page({
 
   // ========== 拍照录入 ==========
 
-  // 拍照录入
+  // 拍照录入 - 选择图片后显示预览
   chooseImage() {
     wx.chooseImage({
       count: 1,
+      sizeType: ['compressed'],  // 压缩图片
+      sourceType: ['camera', 'album'],  // 支持相机和相册
       success: (res) => {
         if (!res.tempFilePaths.length) {
           wx.showToast({ title: '未选择图片', icon: 'none' });
           return;
         }
-        this.processImage(res.tempFilePaths[0]);
+        // 保存临时路径，显示预览
+        this.setData({
+          tempImagePath: res.tempFilePaths[0],
+          previewImage: res.tempFilePaths[0]
+        });
       }
     });
   },
+
+  // 关闭预览
+  closePreview() {
+    this.setData({
+      previewImage: '',
+      tempImagePath: ''
+    });
+  },
+
+  // 确认图片，开始识别
+  confirmImage() {
+    const tempPath = this.data.tempImagePath;
+    if (!tempPath) {
+      wx.showToast({ title: '图片不存在', icon: 'none' });
+      return;
+    }
+    // 关闭预览，开始处理
+    this.setData({ previewImage: '' });
+    this.processImage(tempPath);
+  },
+
+  // 阻止事件冒泡
+  preventBubble() {},
 
   // 图片处理流程
   async processImage(imgPath) {

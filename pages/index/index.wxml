@@ -10,6 +10,12 @@
 
   <!-- 主操作区域 -->
   <view class="main-action">
+    <!-- 拍照指导提示 -->
+    <view class="camera-tips">
+      <text class="tips-icon">💡</text>
+      <text class="tips-text">拍摄化验单时，请确保：光线充足、文字清晰、单据平整</text>
+    </view>
+
     <!-- 核心拍照按钮 -->
     <view class="primary-btn" bindtap="chooseImage">
       <view class="primary-btn-inner">
@@ -89,6 +95,24 @@
     <view class="tool-btn" bindtap="handleAboutClick">
       <text class="tool-btn-icon">ℹ️</text>
       <text class="tool-btn-text">关于</text>
+    </view>
+  </view>
+
+  <!-- 图片预览弹窗 -->
+  <view class="preview-modal" wx:if="{{previewImage}}" bindtap="closePreview">
+    <view class="preview-content" catchtap="preventBubble">
+      <view class="preview-header">
+        <text class="preview-title">📷 照片预览</text>
+        <text class="preview-close" bindtap="closePreview">✕</text>
+      </view>
+      <image class="preview-image" src="{{previewImage}}" mode="aspectFit"></image>
+      <view class="preview-tips">
+        <text>请确认照片清晰可见，文字可辨</text>
+      </view>
+      <view class="preview-actions">
+        <button class="preview-btn preview-btn-cancel" bindtap="closePreview">重拍</button>
+        <button class="preview-btn preview-btn-confirm" bindtap="confirmImage">确认识别</button>
+      </view>
     </view>
   </view>
 </view>
