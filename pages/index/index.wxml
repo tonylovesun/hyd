@@ -2,7 +2,7 @@
 <view class="page-container">
   <!-- 极简顶部导航 -->
   <view class="nav-bar">
-    <text class="nav-title">简医记1.5.2</text>
+    <text class="nav-title">简医记1.5.3</text>
     <view class="nav-menu" bindtap="handleMenuClick">
       <text>☰</text>
     </view>
