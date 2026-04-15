@@ -40,6 +40,7 @@ async function upload() {
     console.log('项目配置完成');
     
     // 预览/发布体验版
+    console.log('=== 步骤1: 发布体验版 ===');
     const qrcodePath = path.join(__dirname, 'preview-qrcode.png');
     const previewResult = await ci.preview({
       project: project,
@@ -54,15 +55,34 @@ async function upload() {
       },
       qrcodeOutputPath: qrcodePath,
       onProgressUpdate: (progress) => {
+        console.log('体验版进度:', progress.message || progress);
+      },
+    });
+    
+    console.log('体验版发布成功!');
+    console.log('版本:', previewResult.version);
+    
+    // 上传到微信公众平台后台
+    console.log('=== 步骤2: 上传到微信公众平台 ===');
+    const uploadResult = await ci.upload({
+      project: project,
+      version: process.env.GITHUB_RUN_NUMBER || '1.0.0',
+      desc: 'GitHub Actions 自动部署 - ' + (process.env.GITHUB_SHA ? process.env.GITHUB_SHA.substring(0, 7) : 'local'),
+      setting: {
+        es6: true,
+        minify: true,
+        minifyWXML: true,
+        minifyWXSS: true,
+        minifyJS: true,
+      },
+      onProgressUpdate: (progress) => {
         console.log('上传进度:', progress.message || progress);
       },
     });
     
-    console.log('=== 体验版发布成功 ===');
-    console.log('版本:', previewResult.version);
-    console.log('提示:', previewResult.extMsg || '请在微信公众平台查看体验版');
-    
-    // 上传二维码作为 artifact（GitHub Actions 会自动处理）
+    console.log('=== 完成! ===');
+    console.log('体验版: 请扫码体验');
+    console.log('后台版本: 可在 mp.weixin.qq.com 提交审核');
     
   } catch (err) {
     console.error('=== 上传失败 ===');
