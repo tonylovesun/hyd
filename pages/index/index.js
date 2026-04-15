@@ -482,13 +482,16 @@ Page({
 
     // 提取数值 - 排除干扰项
     const extractValue = (text) => {
-      // 排除参考范围、序号等
-      if (/(参考|范围|代号|序号|项目)/.test(text)) return null;
+      // 排除参考范围、序号、页码等干扰项
+      if (/(参考|范围|代号|序号|项目|页码|#|\/|\|)/.test(text)) return null;
       
       // 匹配独立数值（可能是小数、负数、有箭头）
       const match = text.match(/^[=<>]*\s*([<>]?[↓↑]?\s*\d+(\.\d+)?)/);
       if (match) {
-        return parseFloat(match[1].replace(/\s/g, ''));
+        const val = parseFloat(match[1].replace(/\s/g, ''));
+        // 排除过小或过大的异常值（可能是页码等）
+        if (val < 0.01 || val > 100000) return null;
+        return val;
       }
       return null;
     };
@@ -498,10 +501,12 @@ Page({
       const s1 = str1.toLowerCase();
       const s2 = str2.toLowerCase();
       if (s1 === s2) return 1;
-      if (s1.includes(s2) || s2.includes(s1)) return 0.8;
+      // 包含关系给 0.85 分
+      if (s1.includes(s2) || s2.includes(s1)) return 0.85;
       
       // 计算编辑距离
       const len1 = s1.length, len2 = s2.length;
+      if (len1 < 2 || len2 < 2) return 0;
       const dp = Array(len1 + 1).fill(null).map(() => Array(len2 + 1).fill(0));
       for (let i = 0; i <= len1; i++) dp[i][0] = i;
       for (let j = 0; j <= len2; j++) dp[0][j] = j;
@@ -520,20 +525,26 @@ Page({
 
     // 查找匹配的别名（支持模糊匹配）
     const findMatchingAlias = (text) => {
-      // 先精确匹配
+      // 先精确匹配（优先）
       for (const alias of aliasKeys) {
         if (text.includes(alias) || alias.includes(text)) {
           return alias;
         }
       }
-      // 模糊匹配（相似度 > 0.6）
+      // 模糊匹配（相似度 > 0.75 才接受，避免误匹配）
+      let bestMatch = null;
+      let bestScore = 0;
       for (const alias of aliasKeys) {
-        if (similarity(text, alias) > 0.6) {
-          console.log('模糊匹配:', text, '->', alias, '相似度:', similarity(text, alias));
-          return alias;
+        const score = similarity(text, alias);
+        if (score > 0.75 && score > bestScore) {
+          bestScore = score;
+          bestMatch = alias;
         }
       }
-      return null;
+      if (bestMatch) {
+        console.log('模糊匹配:', text, '->', bestMatch, '相似度:', bestScore);
+      }
+      return bestMatch;
     };
 
     // 匹配项目
@@ -604,12 +615,21 @@ Page({
         }
       }
 
-      // 方法6: 查找同行任意位置的数字
+      // 方法6: 只有当项目名后面紧跟数字时才提取（最严格）
+      // 例如 "白细胞 5.2" 而不是 "白细胞计数 5.2"
       if (value === null) {
-        const anyMatch = item.text.match(/(\d+(\.\d+)?)/);
-        if (anyMatch && !/(参考|范围|代号|序号)/.test(item.text)) {
-          value = parseFloat(anyMatch[1]);
-          console.log('  同行任意位置:', value);
+        // 检查项目名是否在文字开头或紧跟空格/符号后
+        const aliasIndex = item.text.indexOf(matchedAlias);
+        if (aliasIndex !== -1 && aliasIndex < 5) { // 项目名在前面部分
+          const afterText = item.text.substring(aliasIndex + matchedAlias.length);
+          // 只有数字紧跟在项目名后面（中间无汉字）才提取
+          if (/^[：: ]+(\d+(\.\d+)?)/.test(afterText)) {
+            const numMatch = afterText.match(/^(\d+(\.\d+)?)/);
+            if (numMatch) {
+              value = parseFloat(numMatch[1]);
+              console.log('  项目名后紧跟数字:', value);
+            }
+          }
         }
       }
 
