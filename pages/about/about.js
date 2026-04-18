@@ -2,7 +2,15 @@
 Page({
   data: {
     contactValue: '',
-    opinionValue: ''
+    opinionValue: '',
+    version: ''
+  },
+
+  onLoad() {
+    // 从 app.js 动态获取版本号
+    this.setData({
+      version: getApp().globalData.VERSION
+    });
   },
 
   onContactInput(event) {

@@ -1,12 +1,12 @@
 <!-- pages/index/index.wxml - 极简风格首页 -->
 <view class="page-container">
-  <!-- 极简顶部导航 -->
+  <!-- 极简顶部导航 
   <view class="nav-bar">
-    <text class="nav-title">简医记1.5.7</text>
+    <text class="nav-title">简医记</text>
     <view class="nav-menu" bindtap="handleMenuClick">
       <text>☰</text>
     </view>
-  </view>
+  </view> -->
 
   <!-- 主操作区域 -->
   <view class="main-action">

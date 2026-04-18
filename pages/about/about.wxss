@@ -15,6 +15,13 @@ page {
   padding: 0 25px;  /* 增加左右间距 */
 }
 
+.version-text {
+  text-align: center;
+  font-size: 14px;
+  color: #999;
+  margin-bottom: 20px;
+}
+
 .field-text {
   margin-top: 5px; /* 上间距 */
   margin-bottom: 5px; /* 下间距 */

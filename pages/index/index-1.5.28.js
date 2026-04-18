@@ -404,130 +404,217 @@ Page({
   },
 
   // 解析OCR结果 - 增强版 v2
-  // 解析OCR结果 - 1.5.2版本 + 定性结果识别
   parseOCRResult(ocrData) {
     if (!ocrData || !Array.isArray(ocrData)) {
       console.error('OCR数据格式异常:', typeof ocrData);
       throw new Error('OCR数据格式异常');
     }
 
-    const texts = ocrData.map(item => ({
-      text: item.DetectedText?.trim() || '',
-      location: item.ItemPolygon || {}
-    }));
+    // 构建文本数组，包含位置信息
+    const items = ocrData.map(item => ({
+      text: (item.DetectedText || '').trim(),
+      // 从 ItemPolygon 提取位置信息（Top, Left, Width, Height）
+      y: item.ItemPolygon?.Top || 0,
+      x: item.ItemPolygon?.Left || 0,
+      width: item.ItemPolygon?.Width || 0,
+      height: item.ItemPolygon?.Height || 0
+    })).filter(item => item.text.length > 0);
 
-    console.log('识别到的文字数:', texts.length);
-    console.log('识别内容:', texts.map(t => t.text).join(' | '));
+    console.log('识别到的条目数:', items.length);
+    console.log('识别内容:', items.map(t => t.text).join('\n'));
 
     // 提取医院名称
-    const hospitalItem = texts.find(t => /(医院|中心|门诊|诊所)/.test(t.text));
+    const hospitalItem = items.find(t => /(医院|中心|门诊|诊所)/.test(t.text));
     const hospital = hospitalItem ? hospitalItem.text : '未知';
 
-    // 提取日期（只取日期部分，去掉前缀如"接收"）
-    const dateItem = texts.find(t => /\d{4}[-/年]\d{1,2}[-/月]\d{1,2}日?/.test(t.text));
-    let date = dateItem ? dateItem.text : new Date().toISOString().split('T')[0];
-    // 提取纯日期格式 YYYY-MM-DD
-    const dateMatch = date.match(/(\d{4})[-/年](\d{1,2})[-/月](\d{1,2})日?/);
-    if (dateMatch) {
-      date = `${dateMatch[1]}-${dateMatch[2].padStart(2, '0')}-${dateMatch[3].padStart(2, '0')}`;
+    // 提取日期 - 支持多种格式
+    const datePatterns = [
+      /\d{4}[-/年]\d{1,2}[-/月]\d{1,2}[日]?/,  // 2024-01-01, 2024年1月1日
+      /\d{4}\.\d{1,2}\.\d{1,2}/,               // 2024.01.01
+      /\d{4}年\d{1,2}月\d{1,2}/,                 // 2024年1月1日
+      /\d{2}[-/年]\d{1,2}[-/月]\d{1,2}[日]?/    // 24-01-01
+    ];
+    let date = new Date().toISOString().split('T')[0];
+    for (const item of items) {
+      for (const pattern of datePatterns) {
+        const match = item.text.match(pattern);
+        if (match) {
+          date = match[0];
+          // 转换为标准格式
+          date = date.replace(/[年日月]/g, '-').replace(/\./g, '-').replace(/--+/g, '-');
+          date = date.replace(/^(\d{4})-(\d{1,2})-(\d{1,2}).*$/, (_, y, m, d) => 
+            `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`
+          );
+          break;
+        }
+      }
+      if (date.length === 10) break;
     }
-    console.log('提取的日期:', date);
 
-    // 构建映射表
-    const aliasMap = {};
+    // 构建项目映射表
     const tableData = app.globalData.tableData || [];
-    
+    const aliasMap = {};
     tableData.forEach(item => {
       item.alias.forEach(alias => {
-        aliasMap[alias] = { type: item.type, r_i: item.r_i };
+        aliasMap[alias] = { type: item.type, r_i: item.r_i, name: item.name };
       });
     });
 
+    // 按长度排序（优先匹配长名称）
     const aliasKeys = Object.keys(aliasMap).sort((a, b) => b.length - a.length);
     console.log('项目别名数:', aliasKeys.length);
     if (aliasKeys.length === 0) return null;
 
-    const regex = new RegExp(aliasKeys.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'i');
+    // 判断两个 Y 坐标是否在同一行（阈值设为高度的 1/3）
+    const isSameRow = (item1, item2) => Math.abs(item1.y - item2.y) < (item1.height + item2.height) / 3;
+
+    // 判断项目是否在前一行
+    const isPrevRow = (item, target) => {
+      const threshold = Math.max(item.height, target.height) * 1.5;
+      return target.y < item.y && (item.y - target.y) < threshold;
+    };
+
+    // 判断项目是否在后一行
+    const isNextRow = (item, target) => {
+      const threshold = Math.max(item.height, target.height) * 1.5;
+      return target.y > item.y && (target.y - item.y) < threshold;
+    };
+
+    // 提取数值 - 排除干扰项
+    const extractValue = (text) => {
+      // 排除参考范围、序号等
+      if (/(参考|范围|代号|序号|项目)/.test(text)) return null;
+      
+      // 匹配独立数值（可能是小数、负数、有箭头）
+      const match = text.match(/^[=<>]*\s*([<>]?[↓↑]?\s*\d+(\.\d+)?)/);
+      if (match) {
+        return parseFloat(match[1].replace(/\s/g, ''));
+      }
+      return null;
+    };
+
+    // 模糊匹配 - 计算字符串相似度
+    const similarity = (str1, str2) => {
+      const s1 = str1.toLowerCase();
+      const s2 = str2.toLowerCase();
+      if (s1 === s2) return 1;
+      if (s1.includes(s2) || s2.includes(s1)) return 0.8;
+      
+      // 计算编辑距离
+      const len1 = s1.length, len2 = s2.length;
+      const dp = Array(len1 + 1).fill(null).map(() => Array(len2 + 1).fill(0));
+      for (let i = 0; i <= len1; i++) dp[i][0] = i;
+      for (let j = 0; j <= len2; j++) dp[0][j] = j;
+      for (let i = 1; i <= len1; i++) {
+        for (let j = 1; j <= len2; j++) {
+          const cost = s1[i-1] === s2[j-1] ? 0 : 1;
+          dp[i][j] = Math.min(
+            dp[i-1][j] + 1,
+            dp[i][j-1] + 1,
+            dp[i-1][j-1] + cost
+          );
+        }
+      }
+      return 1 - dp[len1][len2] / Math.max(len1, len2);
+    };
+
+    // 查找匹配的别名（支持模糊匹配）
+    const findMatchingAlias = (text) => {
+      // 先精确匹配
+      for (const alias of aliasKeys) {
+        if (text.includes(alias) || alias.includes(text)) {
+          return alias;
+        }
+      }
+      // 模糊匹配（相似度 > 0.6）
+      for (const alias of aliasKeys) {
+        if (similarity(text, alias) > 0.6) {
+          console.log('模糊匹配:', text, '->', alias, '相似度:', similarity(text, alias));
+          return alias;
+        }
+      }
+      return null;
+    };
 
     // 匹配项目
     const typeCount = {};
     const matchedProjects = {};
-    const matchedHasValue = {}; // 记录每个r_i是否提取到有效数值
-    
-    texts.forEach((textItem, index) => {
-      const text = textItem.text;
-      const match = text.match(regex);
-      if (match) {
-        const matchedAlias = match[0];
-        const { type, r_i } = aliasMap[matchedAlias];
-        typeCount[type] = (typeCount[type] || 0) + 1;
-        console.log('匹配到项目:', matchedAlias, 'type:', type, 'r_i:', r_i);
 
-        // 提取数值 - 直接从下一行读取
-        let value = null;
-        
-        // 优先从下一行提取数值
-        if (texts[index + 1]) {
-          const nextText = texts[index + 1].text;
-          console.log('  下一行:', nextText);
-          const valueMatch = nextText.match(/^[|：:\s\-]*([<>↓↑]?\s*\d+(\.\d+)?)/);
-          if (valueMatch) {
-            value = parseFloat(valueMatch[1].replace(/\s/g, ''));
-            console.log('  从下一行提取数值:', value);
-          } else {
-            console.log('  下一行无数值');
-          }
-        }
-        
-        // 如果下一行无数值，尝试当前行
-        if (value === null) {
-          console.log('  尝试当前行:', text);
-          const valueMatch = text.match(/([<>↓↑]?\s*\d+(\.\d+)?)/);
-          if (valueMatch) {
-            value = parseFloat(valueMatch[1].replace(/\s/g, ''));
-            console.log('  从当前行提取数值:', value);
-          }
-        }
-        
-        // 方式2: 定性结果识别（仅在无数值时）
-        if (value === null) {
-          // 检查本行
-          if (/阴性/.test(text)) {
-            value = 0;
-            console.log('  定性结果: 阴性 -> 0');
-          } else if (/阳性(?![+-])/.test(text) && !/弱阳性/.test(text)) {
-            value = 2;
-            console.log('  定性结果: 阳性 -> 2');
-          } else if (/弱阳性|±|\+\-/.test(text)) {
-            value = 1;
-            console.log('  定性结果: 弱阳性 -> 1');
-          } else if (/\+{4}|4\+/.test(text)) {
-            value = 6;
-            console.log('  定性结果: ++++ -> 6');
-          } else if (/\+{3}|3\+/.test(text)) {
-            value = 5;
-            console.log('  定性结果: +++ -> 5');
-          } else if (/\+{2}|2\+/.test(text)) {
-            value = 4;
-            console.log('  定性结果: ++ -> 4');
-          } else if (/\+/.test(text) && !/\+\+/.test(text)) {
-            value = 3;
-            console.log('  定性结果: + -> 3');
-          }
-        }
+    items.forEach((item, index) => {
+      const matchedAlias = findMatchingAlias(item.text);
+      if (!matchedAlias) return;
 
-        // 匹配到的项目：多次匹配时，只保留有数值的结果
-        if (matchedHasValue[r_i] !== true && value !== null) {
-          // 之前没有有效数值，现在有，保存
-          matchedProjects[r_i] = value;
-          matchedHasValue[r_i] = true;
-        } else if (matchedHasValue[r_i] !== true) {
-          // 之前没有有效数值，现在也没有，先用0占位
-          matchedProjects[r_i] = 0;
-        } else {
-          // 之前已有有效数值，忽略这次
-          console.log('  忽略重复匹配（已有效数值:', matchedProjects[r_i] + ')');
+      const { type, r_i } = aliasMap[matchedAlias];
+      typeCount[type] = (typeCount[type] || 0) + 1;
+      console.log('匹配到项目:', matchedAlias, 'type:', type, 'r_i:', r_i);
+
+      let value = null;
+
+      // 方法1: 从同行提取（项目名后面的数字）
+      if (value === null) {
+        const afterText = item.text.substring(item.text.indexOf(matchedAlias) + matchedAlias.length);
+        value = extractValue(afterText);
+        if (value !== null) console.log('  同行提取:', value);
+      }
+
+      // 方法2: 从同行括号内提取
+      if (value === null) {
+        const bracketMatch = item.text.match(/[(（]([^)）]*?\d+(\.\d+)?)[)）]/);
+        if (bracketMatch) {
+          value = extractValue(bracketMatch[1]);
+          if (value !== null) console.log('  括号内提取:', value);
         }
+      }
+
+      // 方法3: 从下一行提取
+      if (value === null) {
+        for (let i = index + 1; i < items.length; i++) {
+          if (!isSameRow(item, items[i])) break;
+          value = extractValue(items[i].text);
+          if (value !== null) {
+            console.log('  下一行提取:', value);
+            break;
+          }
+        }
+      }
+
+      // 方法4: 从后一行（跨行表格）
+      if (value === null) {
+        for (let i = index + 1; i < items.length; i++) {
+          if (isNextRow(item, items[i])) {
+            value = extractValue(items[i].text);
+            if (value !== null) {
+              console.log('  后一行提取:', value);
+              break;
+            }
+          }
+        }
+      }
+
+      // 方法5: 从前行提取
+      if (value === null) {
+        for (let i = index - 1; i >= 0; i--) {
+          if (isPrevRow(item, items[i])) {
+            value = extractValue(items[i].text);
+            if (value !== null) {
+              console.log('  前一行提取:', value);
+              break;
+            }
+          }
+        }
+      }
+
+      // 方法6: 查找同行任意位置的数字
+      if (value === null) {
+        const anyMatch = item.text.match(/(\d+(\.\d+)?)/);
+        if (anyMatch && !/(参考|范围|代号|序号)/.test(item.text)) {
+          value = parseFloat(anyMatch[1]);
+          console.log('  同行任意位置:', value);
+        }
+      }
+
+      if (value !== null) {
+        matchedProjects[r_i] = value;
       }
     });
 
@@ -556,24 +643,16 @@ Page({
     console.log('最终项目:', finalProjects);
 
     if (Object.keys(finalProjects).length === 0) {
-      wx.showToast({ title: '无有效项目', icon: 'none' });
+      wx.showToast({ title: '未识别到有效项目', icon: 'none' });
       return null;
     }
 
-    // 处理NaN值，转为空字符串
-    const cleanProjects = {};
-    Object.keys(finalProjects).forEach(key => {
-      const val = finalProjects[key];
-      cleanProjects[key] = (val !== null && !isNaN(val)) ? val : '';
-    });
-
-    return { date, hospital, openid: app.globalData.openid, cate_id, ...cleanProjects };
+    return { date, hospital, openid: app.globalData.openid, cate_id, ...finalProjects };
   },
 
   // 保存记录
   saveToServer(data) {
     wx.showLoading({ title: '保存中...', mask: true });
-    console.log('准备保存数据:', JSON.stringify(data));
 
     wx.request({
       url: 'https://jyj.lboxshop.cc/saveRecord',
@@ -581,7 +660,6 @@ Page({
       header: { 'Content-Type': 'application/json' },
       data: { ...data, openid: app.globalData.openid },
       success: (res) => {
-        console.log('服务器响应:', res);
         if (res.statusCode === 200 && res.data.message === '记录保存成功') {
           wx.showToast({ title: '保存成功', icon: 'success' });
           wx.navigateTo({

@@ -29,4 +29,8 @@
   </van-cell-group>
   <!-- 提交按钮 -->
   <van-button round type="primary" size="large" bindtap="onSubmit">提交</van-button>
+  <!-- 版本号 -->
+  <view class="version-text">
+    <text>版本 {{version}}</text>
+  </view>
 </view>

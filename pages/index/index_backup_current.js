@@ -1,4 +1,4 @@
-// pages/index/index.js - 极简风格首页
+﻿// pages/index/index.js - 极简风格首页
 const app = getApp();
 
 // 类型颜色映射
@@ -403,8 +403,7 @@ Page({
     });
   },
 
-  // 解析OCR结果 - 增强版 v2
-  // 解析OCR结果 - 1.5.2版本 + 定性结果识别
+  // 解析OCR结果 - 恢复版（准确率高）
   parseOCRResult(ocrData) {
     if (!ocrData || !Array.isArray(ocrData)) {
       console.error('OCR数据格式异常:', typeof ocrData);
@@ -423,15 +422,9 @@ Page({
     const hospitalItem = texts.find(t => /(医院|中心|门诊|诊所)/.test(t.text));
     const hospital = hospitalItem ? hospitalItem.text : '未知';
 
-    // 提取日期（只取日期部分，去掉前缀如"接收"）
+    // 提取日期
     const dateItem = texts.find(t => /\d{4}[-/年]\d{1,2}[-/月]\d{1,2}日?/.test(t.text));
-    let date = dateItem ? dateItem.text : new Date().toISOString().split('T')[0];
-    // 提取纯日期格式 YYYY-MM-DD
-    const dateMatch = date.match(/(\d{4})[-/年](\d{1,2})[-/月](\d{1,2})日?/);
-    if (dateMatch) {
-      date = `${dateMatch[1]}-${dateMatch[2].padStart(2, '0')}-${dateMatch[3].padStart(2, '0')}`;
-    }
-    console.log('提取的日期:', date);
+    const date = dateItem ? dateItem.text : new Date().toISOString().split('T')[0];
 
     // 构建映射表
     const aliasMap = {};
@@ -449,10 +442,9 @@ Page({
 
     const regex = new RegExp(aliasKeys.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'i');
 
-    // 匹配项目
+    // 匹配项目 - 简单可靠的数值提取
     const typeCount = {};
     const matchedProjects = {};
-    const matchedHasValue = {}; // 记录每个r_i是否提取到有效数值
     
     texts.forEach((textItem, index) => {
       const text = textItem.text;
@@ -463,70 +455,38 @@ Page({
         typeCount[type] = (typeCount[type] || 0) + 1;
         console.log('匹配到项目:', matchedAlias, 'type:', type, 'r_i:', r_i);
 
-        // 提取数值 - 直接从下一行读取
+        // 提取数值 - 简单方式
         let value = null;
         
-        // 优先从下一行提取数值
-        if (texts[index + 1]) {
+        // 方式1: 项目名后面的数字
+        const afterMatch = text.replace(matchedAlias, '').trim();
+        const valueMatch = afterMatch.match(/^[：:]*\s*([<>]?\s*\d+(\.\d+)?)/);
+        if (valueMatch) {
+          value = parseFloat(valueMatch[1].replace(/\s/g, ''));
+          console.log('  从本行提取数值:', value);
+        }
+        
+        // 方式2: 下一行的数字
+        if (value === null && index + 1 < texts.length) {
           const nextText = texts[index + 1].text;
-          console.log('  下一行:', nextText);
-          const valueMatch = nextText.match(/^[|：:\s\-]*([<>↓↑]?\s*\d+(\.\d+)?)/);
-          if (valueMatch) {
-            value = parseFloat(valueMatch[1].replace(/\s/g, ''));
+          const nextMatch = nextText.match(/^([<>]?\s*\d+(\.\d+)?)/);
+          if (nextMatch) {
+            value = parseFloat(nextMatch[1].replace(/\s/g, ''));
             console.log('  从下一行提取数值:', value);
-          } else {
-            console.log('  下一行无数值');
           }
         }
         
-        // 如果下一行无数值，尝试当前行
+        // 方式3: 同行任意数字
         if (value === null) {
-          console.log('  尝试当前行:', text);
-          const valueMatch = text.match(/([<>↓↑]?\s*\d+(\.\d+)?)/);
-          if (valueMatch) {
-            value = parseFloat(valueMatch[1].replace(/\s/g, ''));
-            console.log('  从当前行提取数值:', value);
-          }
-        }
-        
-        // 方式2: 定性结果识别（仅在无数值时）
-        if (value === null) {
-          // 检查本行
-          if (/阴性/.test(text)) {
-            value = 0;
-            console.log('  定性结果: 阴性 -> 0');
-          } else if (/阳性(?![+-])/.test(text) && !/弱阳性/.test(text)) {
-            value = 2;
-            console.log('  定性结果: 阳性 -> 2');
-          } else if (/弱阳性|±|\+\-/.test(text)) {
-            value = 1;
-            console.log('  定性结果: 弱阳性 -> 1');
-          } else if (/\+{4}|4\+/.test(text)) {
-            value = 6;
-            console.log('  定性结果: ++++ -> 6');
-          } else if (/\+{3}|3\+/.test(text)) {
-            value = 5;
-            console.log('  定性结果: +++ -> 5');
-          } else if (/\+{2}|2\+/.test(text)) {
-            value = 4;
-            console.log('  定性结果: ++ -> 4');
-          } else if (/\+/.test(text) && !/\+\+/.test(text)) {
-            value = 3;
-            console.log('  定性结果: + -> 3');
+          const anyMatch = text.match(/([<>]?\s*\d+(\.\d+)?)/);
+          if (anyMatch) {
+            value = parseFloat(anyMatch[1].replace(/\s/g, ''));
+            console.log('  从同行提取数值:', value);
           }
         }
 
-        // 匹配到的项目：多次匹配时，只保留有数值的结果
-        if (matchedHasValue[r_i] !== true && value !== null) {
-          // 之前没有有效数值，现在有，保存
+        if (value !== null) {
           matchedProjects[r_i] = value;
-          matchedHasValue[r_i] = true;
-        } else if (matchedHasValue[r_i] !== true) {
-          // 之前没有有效数值，现在也没有，先用0占位
-          matchedProjects[r_i] = 0;
-        } else {
-          // 之前已有有效数值，忽略这次
-          console.log('  忽略重复匹配（已有效数值:', matchedProjects[r_i] + ')');
         }
       }
     });
@@ -560,45 +520,81 @@ Page({
       return null;
     }
 
-    // 处理NaN值，转为空字符串
-    const cleanProjects = {};
-    Object.keys(finalProjects).forEach(key => {
-      const val = finalProjects[key];
-      cleanProjects[key] = (val !== null && !isNaN(val)) ? val : '';
-    });
-
-    return { date, hospital, openid: app.globalData.openid, cate_id, ...cleanProjects };
+    return { date, hospital, openid: app.globalData.openid, cate_id, ...finalProjects };
   },
 
-  // 保存记录
-  saveToServer(data) {
-    wx.showLoading({ title: '保存中...', mask: true });
-    console.log('准备保存数据:', JSON.stringify(data));
+    // 匹配项目
+    const typeCount = {};
+    const matchedProjects = {};
 
-    wx.request({
-      url: 'https://jyj.lboxshop.cc/saveRecord',
-      method: 'POST',
-      header: { 'Content-Type': 'application/json' },
-      data: { ...data, openid: app.globalData.openid },
-      success: (res) => {
-        console.log('服务器响应:', res);
-        if (res.statusCode === 200 && res.data.message === '记录保存成功') {
-          wx.showToast({ title: '保存成功', icon: 'success' });
-          wx.navigateTo({
-            url: `/pages/detail/detail?id=${res.data.recordId}&type=${data.cate_id}`
-          });
-          // 刷新记录列表
-          this.fetchRecentRecords();
-          // 更新记录数
-          this.setData({ recordCount: this.data.recordCount + 1 });
-        } else {
-          wx.showToast({ title: '保存失败', icon: 'none' });
+    items.forEach((item, index) => {
+      const matchedAlias = findMatchingAlias(item.text);
+      if (!matchedAlias) return;
+
+      const { type, r_i } = aliasMap[matchedAlias];
+      typeCount[type] = (typeCount[type] || 0) + 1;
+      console.log('匹配到项目:', matchedAlias, 'type:', type, 'r_i:', r_i);
+
+      let value = null;
+
+      // 方法1: 从同行提取（项目名后面的数字）
+      if (value === null) {
+        const afterText = item.text.substring(item.text.indexOf(matchedAlias) + matchedAlias.length);
+        value = extractValue(afterText);
+        if (value !== null) console.log('  同行提取:', value);
+      }
+
+      // 方法2: 从同行括号内提取
+      if (value === null) {
+        const bracketMatch = item.text.match(/[(（]([^)）]*?\d+(\.\d+)?)[)）]/);
+        if (bracketMatch) {
+          value = extractValue(bracketMatch[1]);
+          if (value !== null) console.log('  括号内提取:', value);
         }
-      },
-      fail: () => {
-        wx.showToast({ title: '网络错误', icon: 'none' });
-      },
-      complete: () => wx.hideLoading()
-    });
-  }
-});
+      }
+
+      // 方法3: 从下一行提取
+      if (value === null) {
+        for (let i = index + 1; i < items.length; i++) {
+          if (!isSameRow(item, items[i])) break;
+          value = extractValue(items[i].text);
+          if (value !== null) {
+            console.log('  下一行提取:', value);
+            break;
+          }
+        }
+      }
+
+      // 方法4: 从后一行（跨行表格）
+      if (value === null) {
+        for (let i = index + 1; i < items.length; i++) {
+          if (isNextRow(item, items[i])) {
+            value = extractValue(items[i].text);
+            if (value !== null) {
+              console.log('  后一行提取:', value);
+              break;
+            }
+          }
+        }
+      }
+
+      // 方法5: 从前行提取
+      if (value === null) {
+        for (let i = index - 1; i >= 0; i--) {
+          if (isPrevRow(item, items[i])) {
+            value = extractValue(items[i].text);
+            if (value !== null) {
+              console.log('  前一行提取:', value);
+              break;
+            }
+          }
+        }
+      }
+
+      // 方法6: 只有当项目名后面紧跟数字时才提取（最严格）
+      // 例如 "白细胞 5.2" 而不是 "白细胞计数 5.2"
+      if (value === null) {
+        // 检查项目名是否在文字开头或紧跟空格/符号后
+        const aliasIndex = item.text.indexOf(matchedAlias);
+        if (aliasIndex !== -1 && aliasIndex < 5) { // 项目名在前面部分
+          const afterText = item.text.substring(aliasIndex + matchedAlias.length);
